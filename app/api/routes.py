@@ -1,7 +1,7 @@
 from fastapi import APIRouter, HTTPException
 from app.models.request_models import AgentCreateRequest, PromptRequest
 from app.services.agent import Agent
-from app.services.llm_client import llm_client
+from app.services.llm_client import LLMClient
 
 router = APIRouter()
 agents = {}
@@ -10,7 +10,7 @@ agents = {}
 def create_agent(request: AgentCreateRequest):
     if request.agent_id in agents:
         raise HTTPException(status_code=400, detail="Agent already exists")
-    agents[request.agent_id] = Agent(name=request.agent_id, llm_client=llm_client)
+    agents[request.agent_id] = Agent(name=request.agent_id, llm_client=LLMClient)
     return {"message": f"Agent {request.agent_id} created successfully"}
 
 @router.post("/ask/")
@@ -25,11 +25,11 @@ def ask_question(request: PromptRequest):
 
 @router.get("/cost/{agent_id}")
 def get_cost(agent_id: str):
-    return {"agent_id": agent_id, "total_cost": llm_client.get_cost(agent_id)}
+    return {"agent_id": agent_id, "total_cost": LLMClient.get_cost(agent_id)}
 
 @router.get("/prompts/{agent_id}")
 def get_all_prompts(agent_id: str):
-    return {"agent_id": agent_id, "prompts": llm_client.get_all_prompts(agent_id)}
+    return {"agent_id": agent_id, "prompts": LLMClient.get_all_prompts(agent_id)}
 
 @router.get("/agents/")
 def list_agents():
